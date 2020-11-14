@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { register, send_alive } from './actions/clientActions.js';
+import { get_messages } from './actions/chatActions';
 import './App.css';
 
 const ALIVE_INTERVAL = 60000; // 1 minute
@@ -10,15 +12,14 @@ class App extends Component {
     
     // hardcoded for now
     this.entity_id = '210f24c9cb5d49478cfc265def05626f'
-    this.client_name = 'GP_WILLIAM';
+    this.client_name = 'General Practioneer 1';
     this.state = {
     	messages: null,
     }
     
 	 // Check if we assigned a client ID, otherwise register one    
     if (localStorage.getItem('clientId') == null) {
-			// first time accessing browser
-			this.register();    
+        register(this.entity_id); 
     }
     
     // Log the client ID	 
@@ -27,100 +28,8 @@ class App extends Component {
     console.log(this.client_id);
     
     // Setup the alive and message timers
-    this.timer_alive = setInterval(()=> this.send_alive(), ALIVE_INTERVAL);
-    this.timer_message = setInterval(()=> this.get_messages(), MESSAGE_INTERVAL);
-  }
-
-  register() {
-    fetch('https://acutelinkapi.azurewebsites.net/api/client/register', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-         'Accept': 'text/plain',
-         'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-            entityId: this.entity_id, 
-            name: 'GP_sdasd',
-        })
-    	}).then(response => response.json())
-      .then((jsonData) => {
-          console.log(jsonData); // log the json response
-          localStorage.setItem('clientId', jsonData['id']); // save the ID
-      }).catch((error) => {
-    	   // handle errors here
-    	   console.error(error);
-    	})
-  }
-
-  get_clients() {
-      fetch('https://acutelinkapi.azurewebsites.net/api/client/clients', {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'same-origin'
-    }).then(response => response.json())
-      .then((jsonData) => {
-        // jsonData is parsed json object received from url
-        console.log(jsonData);
-    }).catch((error) => {
-        // handle errors here
-        console.error(error);
-    })
-  }
-  
-  async get_messages() {
-    fetch('https://acutelinkapi.azurewebsites.net/api/chat/receive?clientId=' + this.client_id, {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-         'Accept': 'text/plain',
-         'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin',
-    	}).then((response) => {
-          console.log(response); // log data
-			 if (response['statusText'] == 'OK') {
-				// we have data
-				response.json().then((jsonData) => {
-					console.log('dataaaaa');
-					console.log(jsonData[0]['messages'])
-					this.setState({messages: jsonData[0]['messages']});
-					console.log(this.messages);
-				})
-			 }          
-          
-          //this.client_id = jsonData['id'];
-          //console.log(jsonData['id']);
-      })
-    	.catch((error) => {
-    	// handle your errors here
-    	console.error(error)
-    	})
-  }
-
-  async send_alive(){
-      console.log(JSON.stringify({
-            id: this.id,
-        }));
-      fetch('https://acutelinkapi.azurewebsites.net/api/client/alive', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-         'Accept': 'text/plain',
-         'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-            id: this.id,
-        })
-    }).then((response) => {
-    // we just log the respons for now
-    console.log(response)})
-    .catch((error) => {
-    // handle your errors here
-    console.error(error)
-    })
+    this.timer_alive = setInterval(()=> send_alive(), ALIVE_INTERVAL);
+    this.timer_message = setInterval(()=> get_messages(), MESSAGE_INTERVAL);
   }
   
   formatDate(string){
