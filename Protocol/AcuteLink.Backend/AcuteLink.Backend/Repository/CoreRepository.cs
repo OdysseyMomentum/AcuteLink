@@ -100,7 +100,7 @@
     }
 
     /// <inheritdoc />
-    public async Task<List<ChatMessage>> GetChatMessagesAsync(string clientId, string conversationPartnerId)
+    public async Task<List<ChatMessage>> GetConversationChatMessagesAsync(string clientId, string conversationPartnerId)
     {
       var client = await this.GetClientAsync(clientId);
       var conversationPartner = await this.GetClientAsync(conversationPartnerId);
@@ -115,6 +115,24 @@
             m.Sender = client;
             m.Receiver = conversationPartner;
           });
+
+      return messages;
+    }
+
+    /// <inheritdoc />
+    public async Task<List<ChatMessage>> GetAllChatMessagesAsync(string clientId)
+    {
+      var client = await this.GetClientAsync(clientId);
+
+      this.ResolveEntity(client);
+
+      var messages = await this.Messages.Where(m => m.ReceiverId == clientId).ToListAsync();
+      foreach (var message in messages)
+      {
+        var sender = await this.GetClientAsync(message.SenderId);
+        message.Sender = sender;
+        message.Receiver = client;
+      }
 
       return messages;
     }

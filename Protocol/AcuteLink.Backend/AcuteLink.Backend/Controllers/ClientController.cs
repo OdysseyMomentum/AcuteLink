@@ -1,6 +1,7 @@
 ﻿namespace AcuteLink.Backend.Controllers
 {
   using System.Collections.Generic;
+  using System.Linq;
   using System.Threading.Tasks;
 
   using AcuteLink.Backend.Entity;
@@ -36,10 +37,15 @@
 
     [Route("clients")]
     [HttpGet]
-    [SwaggerResponse(StatusCodes.Status200OK, "All Clients in the system", typeof(List<Client>))]
-    public async Task<IActionResult> GetClientsAsync()
+    [SwaggerResponse(StatusCodes.Status200OK, "All Clients in the system or a certain entity", typeof(List<Client>))]
+    public async Task<IActionResult> GetClientsAsync([FromQuery] string entityId)
     {
       var clients = await this.CoreRepository.GetClientsAsync();
+      if (!string.IsNullOrEmpty(entityId))
+      {
+        return this.Ok(clients.Where(c => c.EntityId == entityId).ToList());
+      }
+
       return this.Ok(clients);
     }
 

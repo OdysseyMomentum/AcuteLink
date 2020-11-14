@@ -16,56 +16,94 @@ namespace AcuteLink.Backend.Controllers
   using Swashbuckle.AspNetCore.Annotations;
 
   [Route("api/chat")]
-    [ApiController]
+  [ApiController]
   [EnableCors("AllowAll")]
   public class MessageController : ControllerBase
+  {
+    private ICoreRepository Repository { get; }
+
+    public MessageController(ICoreRepository repository)
     {
-      private ICoreRepository Repository { get; }
+      this.Repository = repository;
+    }
 
-      public MessageController(ICoreRepository repository)
+    [Route("send")]
+    [HttpPost]
+    public async Task<IActionResult> SendMessageAsync([FromBody] SendMessageModel sendMessageModel)
+    {
+      var sender = await this.Repository.GetClientAsync(sendMessageModel.SenderId);
+      var receiver = await this.Repository.GetClientAsync(sendMessageModel.ReceiverId);
+
+      await this.Repository.SendMessageAsync(
+        new ChatMessage
+          {
+            Id = Guid.NewGuid().ToString("N"),
+            Message = sendMessageModel.Message,
+            SenderId = sender.Id,
+            ReceiverId = receiver.Id,
+            Timestamp = DateTime.UtcNow
+          });
+
+      return this.Ok();
+    }
+
+    [Route("receive")]
+    [HttpGet]
+    [SwaggerResponse(StatusCodes.Status200OK, "All Entities in the system", typeof(List<ConversationModel>))]
+    public async Task<IActionResult> ReceiveMessagesAsync([FromQuery] string clientId, [FromQuery] string conversationPartnerId)
+    {
+      if (string.IsNullOrEmpty(conversationPartnerId))
       {
-        this.Repository = repository;
-      }
-
-      [Route("send")]
-      [HttpPost]
-      public async Task<IActionResult> SendMessageAsync([FromBody] SendMessageModel sendMessageModel)
-      {
-        var sender = await this.Repository.GetClientAsync(sendMessageModel.SenderId);
-        var receiver = await this.Repository.GetClientAsync(sendMessageModel.ReceiverId);
-
-        await this.Repository.SendMessageAsync(
-          new ChatMessage
-            {
-              Id = Guid.NewGuid().ToString("N"),
-              Message = sendMessageModel.Message,
-              SenderId = sender.Id,
-              ReceiverId = receiver.Id,
-              Timestamp = DateTime.UtcNow
-            });
-
-        return this.Ok();
-      }
-
-      [Route("receive")]
-      [HttpGet]
-      [SwaggerResponse(StatusCodes.Status200OK, "All Entities in the system", typeof(List<ConversationModel>))]
-      public async Task<IActionResult> ReceiveMessagesAsync([FromQuery] string clientId, [FromQuery] string conversationPartnerId)
-      {
-        var messages = await this.Repository.GetChatMessagesAsync(clientId, conversationPartnerId);
-        if (!messages.Any())
+        var allMessages = await this.Repository.GetAllChatMessagesAsync(clientId);
+        if (!allMessages.Any())
         {
           return this.NoContent();
         }
 
-        var conversation = new ConversationModel
-                             {
-                               Sender = messages.First().Sender,
-                               Receiver = messages.First().Receiver,
-                               Messages = messages.Select(m => new ChatMessageModel { Message = m.Message, Timestamp = m.Timestamp }).ToList()
-                             };
+        var conversations = new List<ConversationModel>();
 
-        return this.Ok(conversation);
+        foreach (var message in allMessages)
+        {
+          if (conversations.Any(c => c.Sender.Id == message.SenderId))
+          {
+            var conversation = conversations.First(c => c.Sender.Id == message.SenderId);
+            conversation.Messages.Add(new ChatMessageModel { Message = message.Message, Timestamp = message.Timestamp });
+          }
+          else
+          {
+            var conversation = new ConversationModel
+                                 {
+                                   Sender = message.Sender,
+                                   Receiver = message.Receiver,
+                                   Messages = new List<ChatMessageModel>
+                                                {
+                                                  new ChatMessageModel { Message = message.Message, Timestamp = message.Timestamp }
+                                                }
+                                 };
+
+            conversations.Add(conversation);
+          }
+        }
+
+        return this.Ok(conversations);
       }
+
+      var messages = await this.Repository.GetConversationChatMessagesAsync(clientId, conversationPartnerId);
+      if (!messages.Any())
+      {
+        return this.NoContent();
+      }
+
+      return this.Ok(
+        new List<ConversationModel>
+          {
+            new ConversationModel
+              {
+                Sender = messages.First().Sender,
+                Receiver = messages.First().Receiver,
+                Messages = messages.Select(m => new ChatMessageModel { Message = m.Message, Timestamp = m.Timestamp }).ToList()
+              }
+          });
     }
+  }
 }

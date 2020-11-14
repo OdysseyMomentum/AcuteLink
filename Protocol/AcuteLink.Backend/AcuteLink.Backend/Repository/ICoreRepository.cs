@@ -19,6 +19,7 @@
 
     Task SendMessageAsync(ChatMessage message);
 
-    Task<List<ChatMessage>> GetChatMessagesAsync(string clientId, string conversationPartnerId);
+    Task<List<ChatMessage>> GetConversationChatMessagesAsync(string clientId, string conversationPartnerId);
+    Task<List<ChatMessage>> GetAllChatMessagesAsync(string clientId);
   }
 }
