@@ -14,5 +14,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="6.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AcuteLink.Backend.Core\AcuteLink.Backend.Core.csproj" />
+  </ItemGroup>
+
 
 </Project>

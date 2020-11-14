@@ -4,7 +4,8 @@
   using System.Linq;
   using System.Threading.Tasks;
 
-  using AcuteLink.Backend.Entity;
+  using AcuteLink.Backend.Core.Entity;
+  using AcuteLink.Backend.Core.Repository;
   using AcuteLink.Backend.Models;
   using AcuteLink.Backend.Repository;
 

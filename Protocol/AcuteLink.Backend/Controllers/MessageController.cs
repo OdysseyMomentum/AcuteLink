@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AcuteLink.Backend.Controllers
 {
-  using AcuteLink.Backend.Entity;
+  using AcuteLink.Backend.Core.Entity;
+  using AcuteLink.Backend.Core.Repository;
   using AcuteLink.Backend.Models;
   using AcuteLink.Backend.Repository;
 

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AcuteLink.Backend
 {
+  using AcuteLink.Backend.Core.Repository;
   using AcuteLink.Backend.Repository;
 
   using Microsoft.EntityFrameworkCore;

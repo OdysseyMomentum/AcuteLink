@@ -1,7 +1,5 @@
-﻿namespace AcuteLink.Backend.Entity
+﻿namespace AcuteLink.Backend.Core.Entity
 {
-  using System.Collections.Generic;
-
   public class Entity
   {
     public string Id { get; set; }

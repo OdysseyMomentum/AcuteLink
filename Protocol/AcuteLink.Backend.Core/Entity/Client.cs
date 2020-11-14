@@ -1,9 +1,8 @@
-﻿namespace AcuteLink.Backend.Entity
+﻿namespace AcuteLink.Backend.Core.Entity
 {
   using System;
   using System.ComponentModel.DataAnnotations.Schema;
-
-  using Newtonsoft.Json;
+  using System.Text.Json.Serialization;
 
   public class Client
   {

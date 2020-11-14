@@ -2,7 +2,7 @@
 {
   using System.Collections.Generic;
 
-  using AcuteLink.Backend.Entity;
+  using AcuteLink.Backend.Core.Entity;
 
   public class ConversationModel
   {

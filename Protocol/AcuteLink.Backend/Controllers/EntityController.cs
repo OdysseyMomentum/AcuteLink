@@ -3,7 +3,7 @@
   using System.Collections.Generic;
   using System.Threading.Tasks;
 
-  using AcuteLink.Backend.Entity;
+  using AcuteLink.Backend.Core.Entity;
   using AcuteLink.Backend.Repository;
 
   using Microsoft.AspNetCore.Cors;

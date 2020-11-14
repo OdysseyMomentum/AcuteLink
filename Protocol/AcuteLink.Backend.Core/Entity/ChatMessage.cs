@@ -1,4 +1,4 @@
-﻿namespace AcuteLink.Backend.Entity
+﻿namespace AcuteLink.Backend.Core.Entity
 {
   using System;
   using System.Text.Json.Serialization;
