@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Telerik.XamarinForms.Chart">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.Chart.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.Common">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.DataControls">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.DataControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.DataGrid">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.DataGrid.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.Barcode">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.Barcode.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.ConversationalUI">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.ConversationalUI.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.DataVisualization">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.DataVisualization.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.Input">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.Input.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.PdfViewer">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.PdfViewer.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.ImageEditor">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.ImageEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.Map">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.Map.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.RichTextEditor">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.RichTextEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.Primitives">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.XamarinForms.SkiaSharp">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.XamarinForms.SkiaSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Documents.SpreadsheetStreaming">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.Documents.SpreadsheetStreaming.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Zip">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Documents.Flow">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.Documents.Flow.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Documents.Flow.FormatProviders.Pdf">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.Documents.Flow.FormatProviders.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Documents.Core">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.Documents.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Documents.Fixed">
+      <HintPath>D:\Program Files (x86)\Progress\Telerik UI for Xamarin R2 2020\Binaries\Portable\Telerik.Documents.Fixed.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="App.xaml.cs">
+      <DependentUpon>*.xaml</DependentUpon>
+    </Compile>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="MainPage.xaml.cs">
+      <DependentUpon>*.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+</Project>
