@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { register, send_alive } from './actions/clientActions.js';
-import { get_messages } from './actions/chatActions';
+import { register, send_alive } from '../../shared/actions/clientActions';
+import { get_messages } from '../../shared/actions/chatActions';
 import './App.css';
 
 const ALIVE_INTERVAL = 60000; // 1 minute
