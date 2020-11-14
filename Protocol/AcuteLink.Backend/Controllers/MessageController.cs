@@ -55,56 +55,59 @@ namespace AcuteLink.Backend.Controllers
     {
       if (string.IsNullOrEmpty(conversationPartnerId))
       {
-        var allMessages = await this.Repository.GetAllChatMessagesAsync(clientId);
-        if (!allMessages.Any())
-        {
-          return this.NoContent();
-        }
-
-        var conversations = new List<ConversationModel>();
-
-        foreach (var message in allMessages)
-        {
-          if (conversations.Any(c => c.Sender.Id == message.SenderId))
-          {
-            var conversation = conversations.First(c => c.Sender.Id == message.SenderId);
-            conversation.Messages.Add(new ChatMessageModel { Message = message.Message, Timestamp = message.Timestamp });
-          }
-          else
-          {
-            var conversation = new ConversationModel
-                                 {
-                                   Sender = message.Sender,
-                                   Receiver = message.Receiver,
-                                   Messages = new List<ChatMessageModel>
-                                                {
-                                                  new ChatMessageModel { Message = message.Message, Timestamp = message.Timestamp }
-                                                }
-                                 };
-
-            conversations.Add(conversation);
-          }
-        }
-
+        var conversations = await this.LoadMultipleConversations(clientId);
         return this.Ok(conversations);
       }
 
-      var messages = await this.Repository.GetConversationChatMessagesAsync(clientId, conversationPartnerId);
-      if (!messages.Any())
+      var singleMessage = await this.LoadSingleConversation(clientId, conversationPartnerId);
+      if (!singleMessage.First().Messages.Any())
       {
         return this.NoContent();
       }
 
-      return this.Ok(
-        new List<ConversationModel>
-          {
+      return this.Ok(singleMessage);
+    }
+
+    private async Task<List<ConversationModel>> LoadMultipleConversations(string clientId)
+    {
+      var allMessages = await this.Repository.GetAllChatMessagesAsync(clientId);
+      var conversations = new List<ConversationModel>();
+
+      foreach (var message in allMessages)
+      {
+        if (conversations.Any(c => c.Sender.Id == message.SenderId))
+        {
+          var conversation = conversations.First(c => c.Sender.Id == message.SenderId);
+          conversation.Messages.Add(new ChatMessageModel { Message = message.Message, Timestamp = message.Timestamp });
+        }
+        else
+        {
+          conversations.Add(
             new ConversationModel
               {
-                Sender = messages.First().Sender,
-                Receiver = messages.First().Receiver,
-                Messages = messages.Select(m => new ChatMessageModel { Message = m.Message, Timestamp = m.Timestamp }).ToList()
-              }
-          });
+                Sender = message.Sender,
+                Receiver = message.Receiver,
+                Messages = new List<ChatMessageModel> { new ChatMessageModel { Message = message.Message, Timestamp = message.Timestamp } }
+              });
+        }
+      }
+
+      return conversations;
+    }
+
+    private async Task<List<ConversationModel>> LoadSingleConversation(string clientId, string conversationPartnerId)
+    {
+      var messages = await this.Repository.GetConversationChatMessagesAsync(clientId, conversationPartnerId);
+      var singleMessage = new List<ConversationModel>
+                            {
+                              new ConversationModel
+                                {
+                                  Sender = messages.First().Sender,
+                                  Receiver = messages.First().Receiver,
+                                  Messages = messages.Select(m => new ChatMessageModel { Message = m.Message, Timestamp = m.Timestamp }).ToList()
+                                }
+                            };
+      return singleMessage;
     }
   }
 }
