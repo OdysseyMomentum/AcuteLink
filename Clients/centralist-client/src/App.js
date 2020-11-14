@@ -5,17 +5,19 @@ const ALIVE_INTERVAL = 60000; // 1 minute
 const MESSAGE_INTERVAL = 1000; // 1 second  
 
 class App extends Component {
+  
   constructor(props) {
     super(props);
     
-    // hardcoded for now
-    this.entity_id = '210f24c9cb5d49478cfc265def05626f'
-    this.client_name = 'GP_WILLIAM';
+    
+    // Entity ID and name for the specific client
+    this.entity_id = 'a433296a52e4456aa5eae80d69dba8fe'
+    this.client_name = 'CENTRALIST';
     this.state = {
     	messages: null,
     }
     
-	 // Check if we assigned a client ID, otherwise register one    
+	 // Check if we assigned a client ID, otherwise register no    
     if (localStorage.getItem('clientId') == null) {
 			// first time accessing browser
 			this.register();    
@@ -42,15 +44,16 @@ class App extends Component {
         credentials: 'same-origin',
         body: JSON.stringify({
             entityId: this.entity_id, 
-            name: 'GP_sdasd',
+            name: this.client_name,
         })
     	}).then(response => response.json())
       .then((jsonData) => {
-          console.log(jsonData); // log the json response
-          localStorage.setItem('clientId', jsonData['id']); // save the ID
-      }).catch((error) => {
-    	   // handle errors here
-    	   console.error(error);
+          console.log(jsonData); // log data
+          localStorage.setItem('clientId', jsonData['id']);
+      })
+    	.catch((error) => {
+    		 // handle errors here
+    		 console.error(error)
     	})
   }
 
@@ -61,10 +64,8 @@ class App extends Component {
         credentials: 'same-origin'
     }).then(response => response.json())
       .then((jsonData) => {
-        // jsonData is parsed json object received from url
         console.log(jsonData);
     }).catch((error) => {
-        // handle errors here
         console.error(error);
     })
   }
@@ -89,13 +90,10 @@ class App extends Component {
 					console.log(this.messages);
 				})
 			 }          
-          
-          //this.client_id = jsonData['id'];
-          //console.log(jsonData['id']);
       })
     	.catch((error) => {
-    	// handle your errors here
-    	console.error(error)
+    	   // handle errors here
+    	   console.error(error);
     	})
   }
 
@@ -115,11 +113,11 @@ class App extends Component {
             id: this.id,
         })
     }).then((response) => {
-    // we just log the respons for now
-    console.log(response)})
-    .catch((error) => {
-    // handle your errors here
-    console.error(error)
+        // we just log the respons for now
+        console.log(response);
+    }).catch((error) => {
+        // handle errors here
+        console.error(error);
     })
   }
   
@@ -157,31 +155,109 @@ class App extends Component {
                   <div class="row">
                       <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
                           <div class="position-sticky">
-                              <ul class="nav flex-column">
+                          		<input type="text" placeholder="Search.." name="search"></input>  <br></br>
+                          		<br></br>
+                              <ul class="nav flex-column">					                                       
                                   <li class="nav-item">
-                                      <a class="nav-link active" aria-current="page" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                                          <span class="ml-2">Dashboard</span>
-                                      </a>
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                                          <span class="ml-2">Book an ER spot</span>
-                                      </a>
+                                          <svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                          <span class="ml-2">Patients</span>
-                                      </a>
+                                          <svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bar-chart-2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                          <svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                      		<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                                           <span class="ml-2">Reports</span>
-                                      </a>
+                                      </a> Received: 4h ago
                                   </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+														<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+														<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
+                                          <span class="ml-2">REQUEST AZC</span> 
+                                      </a> Received: 4h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+														<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
+                                          <span class="ml-2">REQUEST 1 HELOOOO</span> 
+                                      </a> Received: 4h ago
+                                  </li>
+
                               </ul>
                           </div>
                       </nav>
@@ -194,10 +270,10 @@ class App extends Component {
                           </nav>
                           <h1 class="h2">Dashboard</h1>
                           <p>This is the homepage of a simple general practioner interface...</p>
-                          <div class="row my-4">
-                              <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                          <div class="row">
+                              <div class="col-12 col-md-6">
                                   <div class="card">
-                                      <h5 class="card-header">Patients</h5>
+                                      <h5 class="card-header">Patient information</h5>
                                       <div class="card-body">
                                           <h5 class="card-title">345</h5>
                                           <p class="card-text">...</p>
@@ -205,29 +281,9 @@ class App extends Component {
                                       </div>
                                   </div>
                               </div>
-                              <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+                              <div class="col-12 col-md-6">
                                   <div class="card">
-                                      <h5 class="card-header">Column B</h5>
-                                      <div class="card-body">
-                                          <h5 class="card-title">...</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">....</p>
-                                      </div>
-                                  </div>
-                              </div>
-                              <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-                                  <div class="card">
-                                      <h5 class="card-header">Column C</h5>
-                                      <div class="card-body">
-                                          <h5 class="card-title">...</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">....</p>
-                                      </div>
-                                  </div>
-                              </div>
-                              <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-                                  <div class="card">
-                                      <h5 class="card-header">Column D</h5>
+                                      <h5 class="card-header">Capacity information</h5>
                                       <div class="card-body">
                                           <h5 class="card-title">...</h5>
                                           <p class="card-text">...</p>
@@ -239,7 +295,7 @@ class App extends Component {
                           <div class="row">
                               <div class="col-12 col-xl-8 mb-4 mb-lg-0">
                                   <div class="card">
-                                      <h5 class="card-header">Latest messages</h5>
+                                      <h5 class="card-header">Chatbox</h5>
                                       <center><table style={{"width": "500px"}}>
 												  {this.state.messages ? this.state.messages.map((k) => <tr><td>{this.formatDate(k['timestamp'])}</td> <td>{k['message']}</td></tr>): 'No messages yet' }     
 												  </table> </center>                                
@@ -247,7 +303,7 @@ class App extends Component {
                               </div>
                               <div class="col-12 col-xl-4">
                                   <div class="card">
-                                      <h5 class="card-header">Traffic last 6 months</h5>
+                                      <h5 class="card-header">Online institutions</h5>
                                       <div class="card-body">
                                           <div id="traffic-chart"></div>
                                       </div>
