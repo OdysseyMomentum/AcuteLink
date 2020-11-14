@@ -3,6 +3,7 @@ import { register, send_alive } from '../../shared/actions/clientActions';
 import { get_messages } from '../../shared/actions/chatActions';
 import './App.css';
 import { AppComponent } from './AppComponent';
+import { setupApp } from '../../shared/utils/utils';
 
 
 const ALIVE_INTERVAL = 60000; // 1 minute
@@ -18,30 +19,13 @@ class App extends Component {
     this.state = {
     	messages: null,
     }
-    
-	 // Check if we assigned a client ID, otherwise register one    
-    if (localStorage.getItem('clientId') == null) {
-        register(this.entity_id); 
-    }
-    
-    // Log the client ID	 
-	 console.log('Current Client ID:');    
-    this.client_id = localStorage.getItem('clientId');
-    console.log(this.client_id);
-    
-    // Setup the alive and message timers
-    this.timer_alive = setInterval(()=> send_alive(), ALIVE_INTERVAL);
-    this.timer_message = setInterval(()=> get_messages(), MESSAGE_INTERVAL);
-  }
-  
-  formatDate(string){
-    var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'};
-    return new Date(string).toLocaleDateString([],options);
+
+    setupApp();
   }
 
   render() {
       return (
-          <AppComponent />
+          <AppComponent messages={ this.state.messages } />
       );
   }
 }

@@ -3,8 +3,10 @@ import { Sidebar } from '../../shared/components/sidebar';
 import { Card } from '../../shared/components/card';
 import { TrafficChart } from '../../shared/components/traffic';
 import { Dependencies } from '../../shared/dependencies';
+import { formatDate } from '../../shared/utils/utils';
+import { ChatBox } from '../../shared/components/chatbox';
 
-export const AppComponent = () => {
+export const AppComponent = ({chatMessages}) => {
     return (
         <div className="App">
         <Navbar clientName="General Practioner Dashboard" userName="Hello, Dr. Mary Jane" />
@@ -27,15 +29,8 @@ export const AppComponent = () => {
                         <Card header="Column D" title="..." text="..." hightlight=".." />
                     </div>
                     <div class="row">
-                        <div class="col-12 col-xl-8 mb-4 mb-lg-0">
-                            <div class="card">
-                                <h5 class="card-header">Latest messages</h5>
-                                <center><table style={{"width": "500px"}}>
-                                            {this.state.messages ? this.state.messages.map((k) => <tr><td>{this.formatDate(k['timestamp'])}</td> <td>{k['message']}</td></tr>): 'No messages yet' }     
-                                            </table> </center>                                
-                            </div>
-                        </div>
-                        <TrafficChart />s
+                        <ChatBox messages={chatMessages} />
+                        <TrafficChart />
                     </div>
                     <Footer />
                 </main>

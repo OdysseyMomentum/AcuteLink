@@ -2,8 +2,10 @@ import { Navbar } from '../../shared/components/navbar';
 import { TrafficChart } from '../../shared/components/traffic';
 import { Card } from '../../shared/components/card';
 import { Dependencies } from '../../shared/dependencies';
+import { formatDate } from '../../shared/utils/utils';
+import { ChatBox } from '../../shared/components/chatbox';
 
-export const AppComponent = () => {
+export const AppComponent = ({messages}) => {
     return (
         <div className="App">
             <Navbar clientName="Centralist Dashboard" userName="Hello, Dr. Hulsberg" />
@@ -30,14 +32,7 @@ export const AppComponent = () => {
                         <Card header="Capacity information" title="..." text="..." hightlight="18.2% increase since last month" />
                         </div>
                         <div class="row">
-                            <div class="col-12 col-xl-8 mb-4 mb-lg-0">
-                                <div class="card">
-                                    <h5 class="card-header">Chatbox</h5>
-                                    <center><table style={{"width": "500px"}}>
-                                                {this.state.messages ? this.state.messages.map((k) => <tr><td>{this.formatDate(k['timestamp'])}</td> <td>{k['message']}</td></tr>): 'No messages yet' }     
-                                                </table> </center>                                
-                                </div>
-                            </div>
+                            <ChatBox messages={messages} />
                             <TrafficChart />
                         </div>
                         <Footer />
