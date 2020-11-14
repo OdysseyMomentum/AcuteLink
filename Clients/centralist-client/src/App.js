@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { register, send_alive } from '../../shared/actions/clientActions';
 import { get_messages } from '../../shared/actions/chatActions';
+import { requestList } from '../../shared/components/request';
 import './App.css';
 
 const ALIVE_INTERVAL = 60000; // 1 minute
@@ -46,7 +47,7 @@ class App extends Component {
               <nav class="navbar navbar-light bg-light p-3">
                   <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between">
                       <a class="navbar-brand" href="#">
-                          <b>AcuteLink</b> General Practioner Dashboard
+                          <b>AcuteLink</b> Centralist Dashboard
                       </a>
                       <button class="navbar-toggler d-md-none collapsed mb-3" type="button" data-toggle="collapse" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
                           <span class="navbar-toggler-icon"></span>
@@ -71,108 +72,7 @@ class App extends Component {
                           <div class="position-sticky">
                           		<input type="text" placeholder="Search.." name="search"></input>  <br></br>
                           		<br></br>
-                              <ul class="nav flex-column">					                                       
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-                                      		<svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">Reports</span>
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-														<svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-														<svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-														<svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
-                                          <span class="ml-2">REQUEST 1 HELOOOO</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-
-                              </ul>
+                                <requestList />
                           </div>
                       </nav>
                       <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
