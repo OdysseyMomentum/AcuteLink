@@ -21,6 +21,7 @@ Our Virtual Care Coordination (VCC) platform facilitates an efficient communicat
 
 ## Usage
 
+The core protocol is designed with interoperability in mind. The API can be evaluated and tested via Swagger UI that is accessible here: https://acutelinkapi.azurewebsites.net/swagger/
 
 ## Team 
 
