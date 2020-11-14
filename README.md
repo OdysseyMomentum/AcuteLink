@@ -1,3 +1,5 @@
+[![BCH compliance](https://bettercodehub.com/edge/badge/OdysseyMomentum/AcuteLink?branch=main&token=9c7c6c13a73f502ae24a7567747505d20def9ec0)](https://bettercodehub.com/) For more info, click [here](https://odysseymomentum.github.io)
+
 # AcuteLink
 
 > The right care, at the right place and at the right time.
