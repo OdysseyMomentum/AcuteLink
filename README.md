@@ -1,10 +1,9 @@
-[![BCH compliance](https://bettercodehub.com/edge/badge/OdysseyMomentum/AcuteLink?branch=main&token=9c7c6c13a73f502ae24a7567747505d20def9ec0)](https://bettercodehub.com/) For more info, click [here](https://odysseymomentum.github.io)
-
 # AcuteLink
 
 > The right care, at the right place and at the right time.
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+[![BCH compliance](https://bettercodehub.com/edge/badge/OdysseyMomentum/AcuteLink?branch=main&token=9c7c6c13a73f502ae24a7567747505d20def9ec0)](https://bettercodehub.com/) For more info, click [here](https://odysseymomentum.github.io)
 
 Every year, about 1 million patients go to / are referred to a Hospital Emergency Department unnecessarily, putting an enormous pressure on these departments’ scarce capacity. At the same time, research has shown that most of these patients would have had better long-term clinical outcomes if they had been treated in a more appropriate care setting (e.g. ELV or Home Care).
 
