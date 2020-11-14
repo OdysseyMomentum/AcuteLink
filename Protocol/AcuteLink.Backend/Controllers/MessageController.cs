@@ -59,7 +59,7 @@ namespace AcuteLink.Backend.Controllers
         return this.Ok(conversations);
       }
 
-      var singleMessage = await this.LoadSingleConversation(clientId, conversationPartnerId);
+      var singleMessage = await this.LoadSingleConversation(conversationPartnerId, clientId);
       if (!singleMessage.First().Messages.Any())
       {
         return this.NoContent();

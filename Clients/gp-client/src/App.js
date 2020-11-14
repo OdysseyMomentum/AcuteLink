@@ -12,15 +12,13 @@ const MESSAGE_INTERVAL = 1000; // 1 second
 class App extends Component {
   constructor(props) {
     super(props);
-    
-    // hardcoded for now
-    this.entity_id = '210f24c9cb5d49478cfc265def05626f'
+    setupApp('210f24c9cb5d49478cfc265def05626f');
+
     this.client_name = 'General Practioneer 1';
     this.state = {
     	messages: null,
     }
 
-    setupApp();
   }
 
   render() {

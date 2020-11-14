@@ -3,9 +3,9 @@ export const formatDate = (string) => {
     return new Date(string).toLocaleDateString([],options);
 }
 
-export const setupApp = () => {
+export const setupApp = ({entityId}) => {
     if (localStorage.getItem('clientId') == null) {
-        register(this.entity_id); 
+        register(entityId); 
     }
 
     this.timer_alive = setInterval(()=> send_alive(), ALIVE_INTERVAL);

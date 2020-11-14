@@ -13,16 +13,12 @@ class App extends Component {
   
   constructor(props) {
     super(props);
+    setupApp('a433296a52e4456aa5eae80d69dba8fe');
     
-    
-    // Entity ID and name for the specific client
-    this.entity_id = 'a433296a52e4456aa5eae80d69dba8fe'
     this.client_name = 'CENTRALIST';
     this.state = {
     	messages: null,
     }
-    
-    setupApp();
   }
 
   render() {
