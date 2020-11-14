@@ -1,14 +1,14 @@
 import { Navbar } from '../../shared/components/navbar';
 import { Sidebar } from '../../shared/components/sidebar';
 import { Card } from '../../shared/components/card';
-import { TrafficChart } from '../../shared/components/traffic';
 import { Dependencies } from '../../shared/dependencies';
-import { formatDate } from '../../shared/utils/utils';
-import { ChatBox } from '../../shared/components/chatbox';
+import { AppBottom } from '../../shared/components/appBottom';
 
-export const AppComponent = ({chatMessages}) => {
+
+export const AppComponent = ({messages}) => {
     return (
         <div className="App">
+        <Dependencies />
         <Navbar clientName="General Practioner Dashboard" userName="Hello, Dr. Mary Jane" />
         <div class="container-fluid">
             <div class="row">
@@ -28,15 +28,10 @@ export const AppComponent = ({chatMessages}) => {
                         <Card header="Column C" title="..." text="..." hightlight="..." />
                         <Card header="Column D" title="..." text="..." hightlight=".." />
                     </div>
-                    <div class="row">
-                        <ChatBox messages={chatMessages} />
-                        <TrafficChart />
-                    </div>
-                    <Footer />
+                    <AppBottom chatMessages={messages} />
                 </main>
             </div>
         </div>
-        <Dependencies />
     </div>
     )
 }

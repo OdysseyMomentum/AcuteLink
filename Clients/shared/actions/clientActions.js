@@ -1,7 +1,7 @@
 export const register = (entityId) => {
     fetch('https://acutelinkapi.azurewebsites.net/api/client/register', {
-        method: 'POST',
         mode: 'cors',
+        method: 'POST',
         headers: {
             'Accept': 'text/plain',
             'Content-Type': 'application/json',

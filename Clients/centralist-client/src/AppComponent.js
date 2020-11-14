@@ -1,13 +1,12 @@
 import { Navbar } from '../../shared/components/navbar';
-import { TrafficChart } from '../../shared/components/traffic';
 import { Card } from '../../shared/components/card';
 import { Dependencies } from '../../shared/dependencies';
-import { formatDate } from '../../shared/utils/utils';
-import { ChatBox } from '../../shared/components/chatbox';
+import { AppBottom } from '../../shared/components/appBottom';
 
 export const AppComponent = ({messages}) => {
     return (
         <div className="App">
+            <Dependencies />
             <Navbar clientName="Centralist Dashboard" userName="Hello, Dr. Hulsberg" />
             <div class="container-fluid">
                 <div class="row">
@@ -31,15 +30,10 @@ export const AppComponent = ({messages}) => {
                         <Card header="Patient information" title="345" text="..." hightlight="18.2% increase since last month" />
                         <Card header="Capacity information" title="..." text="..." hightlight="18.2% increase since last month" />
                         </div>
-                        <div class="row">
-                            <ChatBox messages={messages} />
-                            <TrafficChart />
-                        </div>
-                        <Footer />
+                        <AppBottom chatMessages={messages} />
                     </main>
                 </div>
             </div>
-            <Dependencies />
         </div>
     )
 }
