@@ -20,7 +20,7 @@ export const AppComponent = ({messages}) => {
                             <li class="breadcrumb-item active" aria-current="page">Overview</li>
                         </ol>
                     </nav>
-                    <h1 class="h2">Dashboard</h1>
+                    <h1 class="h2">GP Dashboard</h1>
                     <p>This is the homepage of a simple general practioner interface...</p>
                     <div class="row my-4">
                         <Card header="Patients" title="345" text="..." hightlight="18.2% increase since last month" />

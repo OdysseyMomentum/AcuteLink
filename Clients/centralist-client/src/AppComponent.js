@@ -25,7 +25,7 @@ export const AppComponent = ({messages}) => {
                             </ol>
                         </nav>
                         <h1 class="h2">Dashboard</h1>
-                        <p>This is the homepage of a simple general practioner interface...</p>
+                        <p>This is the homepage of a simple centralist interface...</p>
                         <div class="row">
                         <Card header="Patient information" title="345" text="..." hightlight="18.2% increase since last month" />
                         <Card header="Capacity information" title="..." text="..." hightlight="18.2% increase since last month" />
