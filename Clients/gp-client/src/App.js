@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
+import ChartistGraph from "react-chartist";
+import Chartist from 'chartist';
+import Legend from "chartist-plugin-legend";
 import './App.css';
+import logo from './Logo.png'; // with import
+
 
 const ALIVE_INTERVAL = 60000; // 1 minute
-const MESSAGE_INTERVAL = 1000; // 1 second  
+const MESSAGE_INTERVAL = 2000; // 1 second  
 
 class App extends Component {
   constructor(props) {
@@ -12,7 +17,10 @@ class App extends Component {
     this.entity_id = '210f24c9cb5d49478cfc265def05626f'
     this.client_name = 'GP_WILLIAM';
     this.state = {
-    	messages: null,
+    	in_messages: [],
+    	out_messages: [],
+    	sorted_messages: [],
+    	message: "",
     }
     
 	 // Check if we assigned a client ID, otherwise register one    
@@ -26,9 +34,19 @@ class App extends Component {
     this.client_id = localStorage.getItem('clientId');
     console.log(this.client_id);
     
+    // Look for centralist
+    this.find_centralist();
+  
+	}
+  
+  componentDidMount() {
     // Setup the alive and message timers
+	 this.get_messages();    
+	 this.sort_messages(); 
+    
     this.timer_alive = setInterval(()=> this.send_alive(), ALIVE_INTERVAL);
     this.timer_message = setInterval(()=> this.get_messages(), MESSAGE_INTERVAL);
+    this.timer_message_sort = setInterval(()=> this.sort_messages(), MESSAGE_INTERVAL);
   }
 
   register() {
@@ -42,7 +60,7 @@ class App extends Component {
         credentials: 'same-origin',
         body: JSON.stringify({
             entityId: this.entity_id, 
-            name: 'GP_sdasd',
+            name: this.client_name,
         })
     	}).then(response => response.json())
       .then((jsonData) => {
@@ -54,23 +72,24 @@ class App extends Component {
     	})
   }
 
-  get_clients() {
-      fetch('https://acutelinkapi.azurewebsites.net/api/client/clients', {
+  find_centralist() {
+      fetch('https://acutelinkapi.azurewebsites.net/api/client/clients?entityId=a433296a52e4456aa5eae80d69dba8fe', {
         method: 'GET',
         mode: 'cors',
         credentials: 'same-origin'
     }).then(response => response.json())
       .then((jsonData) => {
         // jsonData is parsed json object received from url
-        console.log(jsonData);
+        console.log('Centralist:');
+        this.centralist_id = jsonData[0]['id'];
     }).catch((error) => {
         // handle errors here
         console.error(error);
     })
   }
   
-  async get_messages() {
-    fetch('https://acutelinkapi.azurewebsites.net/api/chat/receive?clientId=' + this.client_id, {
+  get_messages() {
+    fetch('https://acutelinkapi.azurewebsites.net/api/chat/receive?clientId=' + this.centralist_id, {
         method: 'GET',
         mode: 'cors',
         headers: {
@@ -83,22 +102,70 @@ class App extends Component {
 			 if (response['statusText'] == 'OK') {
 				// we have data
 				response.json().then((jsonData) => {
-					console.log('dataaaaa');
-					console.log(jsonData[0]['messages'])
-					this.setState({messages: jsonData[0]['messages']});
-					console.log(this.messages);
+					console.log('Message OUT');
+					if (jsonData.length > 0) {
+						console.log('Adding OUT messages');
+						console.log(jsonData[0]['messages']);
+						this.setState({in_messages: jsonData[0]['messages'].map(x => ({'name': this.client_name, 'message': x['message'], 'timestamp': x['timestamp']}))});		
+					}				
 				})
 			 }          
-          
-          //this.client_id = jsonData['id'];
-          //console.log(jsonData['id']);
       })
     	.catch((error) => {
-    	// handle your errors here
-    	console.error(error)
+    	   // handle errors here
+    	   console.error(error);
     	})
+    	
+    	fetch('https://acutelinkapi.azurewebsites.net/api/chat/receive?clientId=' + this.client_id, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+         'Accept': 'text/plain',
+         'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+    	}).then((response) => {
+          console.log(response); // log data
+			 if (response['statusText'] == 'OK') {
+				// we have data
+				response.json().then((jsonData) => {
+					console.log('Message IN');
+					if (jsonData.length > 0) {
+						console.log(jsonData[0]['messages']);
+					
+						console.log('Adding IN messages: ');
+						console.log(this.state.messages);
+						this.setState({out_messages: jsonData[0]['messages'].map(x => ({'name': 'Centralist', 'message': x['message'], 'timestamp': x['timestamp']}))});
+					}
+				})
+			 }          
+      })
+    	.catch((error) => {
+    	   // handle errors here
+    	   console.error(error);
+    	})
+    	this.sort_messages();
   }
-
+  
+  sort_messages() {
+		console.log('Sorting');
+		var total_msg = this.state.in_messages.concat(this.state.out_messages);
+		console.log(total_msg.length)  		
+  		if (total_msg.length > 0 && total_msg.length > this.state.sorted_messages.length) {    	
+			console.log(total_msg.sort(function compare(a, b) {
+  				var dateA = new Date(a['timestamp']);
+  				var dateB = new Date(b['timestamp']);
+  				return dateA - dateB;
+			}));
+					
+    		this.setState({sorted_messages: total_msg.sort(function compare(a, b) {
+  				var dateA = new Date(a['timestamp']);
+  				var dateB = new Date(b['timestamp']);
+  				return dateA - dateB;
+			})});
+		}	
+  }
+  
   async send_alive(){
       console.log(JSON.stringify({
             id: this.id,
@@ -124,8 +191,43 @@ class App extends Component {
   }
   
   formatDate(string){
-    var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'};
+    var options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'};
     return new Date(string).toLocaleDateString([],options);
+  }
+  
+  handleMsgBoxChange = (e) => {
+   this.setState({message: e.target.value});
+  }
+  
+  sendMessage = (e) => {
+  	console.log('Sending message!!');
+  	console.log(this.state.partnerId);
+  	console.log(this.state.message);
+  	
+  	fetch('https://acutelinkapi.azurewebsites.net/api/chat/send', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+         'Accept': 'text/plain',
+         'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            message: this.state.message,
+            receiverId: this.centralist_id,           
+            senderId: this.client_id, 
+        })
+    	}).then((response) => {
+        // we just log the respons for now
+        console.log(response);
+      }).catch((error) => {
+        // handle errors here
+        console.error(error);
+      })
+
+	this.setState({message: ""});
+	e.target.reset();	
+	e.preventDefault();  
   }
 
   render() {
@@ -134,7 +236,11 @@ class App extends Component {
               <nav class="navbar navbar-light bg-light p-3">
                   <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between">
                       <a class="navbar-brand" href="#">
-                          <b>AcuteLink</b> General Practioner Dashboard
+                      <div className="logo">
+          					<img src={logo} width="80"/>
+        					 <b>General Practioner</b> Dashboard
+        					 <br></br>
+                      </div>
                       </a>
                       <button class="navbar-toggler d-md-none collapsed mb-3" type="button" data-toggle="collapse" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
                           <span class="navbar-toggler-icon"></span>
@@ -239,17 +345,37 @@ class App extends Component {
                           <div class="row">
                               <div class="col-12 col-xl-8 mb-4 mb-lg-0">
                                   <div class="card">
-                                      <h5 class="card-header">Latest messages</h5>
-                                      <center><table style={{"width": "500px"}}>
-												  {this.state.messages ? this.state.messages.map((k) => <tr><td>{this.formatDate(k['timestamp'])}</td> <td>{k['message']}</td></tr>): 'No messages yet' }     
-												  </table> </center>                                
+                                      <h5 class="card-header">Chatbox</h5>
+                                  
+                                  <div id="chatbox">
+                                  <table width="710px" border="0" class="table table-striped">
+                                  <tbody>
+											 {this.state.sorted_messages.length > 0 ? this.state.sorted_messages.map((k) => <tr><td class="chattd" width='170px'>{this.formatDate(k['timestamp'])}</td> <td class='chattd' width='140px'> <b> {k['name']} </b> </td> <td class='chattd' width='400px'>{k['message']}</td></tr>): 'No messages yet' }                                      
+										    </tbody>										    
+										    </table>                                  
+                                  </div>
+     
+    										 <form name="message" onSubmit={this.sendMessage}>
+       									  <input name="usermsg"
+       										   size="63" height="200"
+       										   value={this.state.message} onChange={this.handleMsgBoxChange} />
+        									   <input name="submitmsg" type="submit"/>
+    										 </form>                           
                                   </div>
                               </div>
                               <div class="col-12 col-xl-4">
                                   <div class="card">
-                                      <h5 class="card-header">Traffic last 6 months</h5>
+                                      <h5 class="card-header">Patient flow</h5>
                                       <div class="card-body">
-                                          <div id="traffic-chart"></div>
+                                          <div class="ct-chart ct-legend">
+														                                       
+														<ChartistGraph class="ct-legend" data={{
+            										 labels: ['January', 'Februrary', 'March', 'April', 'May', 'June'],
+            										 series: [{data: [14,  12,  18,  20,  25,  28]},
+            										 			 {data: [8,   9,   11,  13,  12,  22]}]}} 
+            										 			 type={'Line'}
+            										 			  />                                          
+                                          </div>
                                       </div>
                                   </div>
                               </div>
