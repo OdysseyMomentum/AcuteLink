@@ -573,7 +573,7 @@ class App extends Component {
                                   </div>
      
     										 <form name="message" onSubmit={this.sendMessage}>
-											  <textarea name="usermsg" cols="70" rows="1"
+											  <textarea class="form-control" name="usermsg" cols="70" rows="1"
 											         value={this.state.message} onChange={this.handleMsgBoxChange}></textarea>       									  
         									   <input class="btn btn-primary" name="submitmsg" type="submit"/>
     										 </form>                           
