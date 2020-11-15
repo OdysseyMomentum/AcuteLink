@@ -1,13 +1,13 @@
+// Imports
 import React, { Component } from 'react';
-import ChartistGraph from "react-chartist";
-import Chartist from 'chartist';
-import Legend from "chartist-plugin-legend";
 import './App.css';
 import logo from './Logo.png'; // with import
+import patient from './Patient.png';
 
 
 const ALIVE_INTERVAL = 60000; // 1 minute
 const MESSAGE_INTERVAL = 2000; // 1 second  
+const CLIENT_INTERVAL = 10000;
 
 class App extends Component {
   constructor(props) {
@@ -15,15 +15,20 @@ class App extends Component {
     
     // hardcoded for now
     this.entity_id = '210f24c9cb5d49478cfc265def05626f'
-    this.client_name = 'GP_WILLIAM';
+    this.client_name = 'Dr. Hulsberg (GP)';
+	 // the state functions weird    
     this.state = {
     	in_messages: [],
     	out_messages: [],
     	sorted_messages: [],
+    	online_list: [],
     	message: "",
+    	referral_done: false,
+    	referral_msg: "Patient not referred yet",
     }
     
-	 // Check if we assigned a client ID, otherwise register one    
+	 // Check if we assigned a client ID, otherwise register one
+	 // VERY IMPORTANT: WE SHOULD use localStorage.clear() [in the browser] once we restart the database    
     if (localStorage.getItem('clientId') == null) {
 			// first time accessing browser
 			this.register();    
@@ -36,19 +41,36 @@ class App extends Component {
     
     // Look for centralist
     this.find_centralist();
-  
 	}
   
   componentDidMount() {
     // Setup the alive and message timers
 	 this.get_messages();    
 	 this.sort_messages(); 
+	 this.get_clients();
     
     this.timer_alive = setInterval(()=> this.send_alive(), ALIVE_INTERVAL);
     this.timer_message = setInterval(()=> this.get_messages(), MESSAGE_INTERVAL);
-    this.timer_message_sort = setInterval(()=> this.sort_messages(), MESSAGE_INTERVAL);
+    this.timer_message_sort = setInterval(() => this.sort_messages(), MESSAGE_INTERVAL);
+    this.timer_clients = setInterval(() => this.get_clients(), CLIENT_INTERVAL);
+  }
+  
+	  
+  get_clients() {
+      fetch('https://acutelinkapi.azurewebsites.net/api/client/clients', {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'same-origin'
+    }).then(response => response.json())
+      .then((jsonData) => {
+        console.log(jsonData);
+        this.setState({online_list: jsonData.map(x => ({'id': x['id'], 'name': x['name']}))});
+    }).catch((error) => {
+        console.error(error);
+    })
   }
 
+   // register method to shoot when making a new ID    
   register() {
     fetch('https://acutelinkapi.azurewebsites.net/api/client/register', {
         method: 'POST',
@@ -107,6 +129,7 @@ class App extends Component {
 						console.log('Adding OUT messages');
 						console.log(jsonData[0]['messages']);
 						this.setState({in_messages: jsonData[0]['messages'].map(x => ({'name': this.client_name, 'message': x['message'], 'timestamp': x['timestamp']}))});		
+						this.sort_messages();					
 					}				
 				})
 			 }          
@@ -136,6 +159,7 @@ class App extends Component {
 						console.log('Adding IN messages: ');
 						console.log(this.state.messages);
 						this.setState({out_messages: jsonData[0]['messages'].map(x => ({'name': 'Centralist', 'message': x['message'], 'timestamp': x['timestamp']}))});
+						this.sort_messages();					
 					}
 				})
 			 }          
@@ -158,12 +182,26 @@ class App extends Component {
   				return dateA - dateB;
 			}));
 					
+    		
     		this.setState({sorted_messages: total_msg.sort(function compare(a, b) {
   				var dateA = new Date(a['timestamp']);
   				var dateB = new Date(b['timestamp']);
   				return dateA - dateB;
 			})});
-		}	
+		}
+		
+		console.log('Looking for last referral');
+		var local_msg = this.state.sorted_messages.slice().reverse()		
+		for (var i = 0; i < local_msg.length; i++) {
+        if (local_msg[i]['message'].includes("[referral]")) {
+        		console.log('Found referral');
+        		this.setState({referral_done: true});
+        		this.setState({referral_msg: local_msg[i]['message'].replace("[referral]","")});
+        		console.log(this.state.referral_msg);
+        		console.log(this.state.referral_done);
+        		break;
+        }
+      }	
   }
   
   async send_alive(){
@@ -262,32 +300,80 @@ class App extends Component {
               <div class="container-fluid">
                   <div class="row">
                       <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+							     <br></br>                          		
+                          <input class="form-control" type="text" placeholder="Search.." name="search"></input>  <br></br>
+                                                        
                           <div class="position-sticky">
                               <ul class="nav flex-column">
                                   <li class="nav-item">
-                                      <a class="nav-link active" aria-current="page" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                                          <span class="ml-2">Dashboard</span>
-                                      </a>
-                                  </li>
-                                  <li class="nav-item">
                                       <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                                          <span class="ml-2">Book an ER spot</span>
-                                      </a>
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Delhaas, 11-06-1932</span> 
+                                      </a> 34893498
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
                                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                          <span class="ml-2">Patients</span>
-                                      </a>
+                            				<span class="ml-2">van der Beek, 01-08-1988</span> 
+                                      </a> 82239018
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bar-chart-2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">Reports</span>
-                                      </a>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Ter Stegen, 12-07-1950</span> 
+                                      </a> 78348932
                                   </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Hulshof, 12-10-2001</span> 
+                                      </a> 32312381
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">van Zoggel, 10-02-1987</span> 
+                                      </a> 13278328
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">van Breggen, 05-05-1992</span> 
+                                      </a> 90347348
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Meex, 11-07-1948</span> 
+                                      </a> 52378123
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Vroemen, 08-07-2008</span> 
+                                      </a> 23127388
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Stokkepijd, 01-05-1941</span> 
+                                      </a> 10218929
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Dierbaar, 05-08-1942</span> 
+                                      </a> 39083498
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            				<span class="ml-2">Faas, 18-06-1932</span> 
+                                      </a> 34878839
+                                  </li>
+
+                                  
+                                  
                               </ul>
                           </div>
                       </nav>
@@ -298,50 +384,51 @@ class App extends Component {
                                   <li class="breadcrumb-item active" aria-current="page">Overview</li>
                               </ol>
                           </nav>
-                          <h1 class="h2">Dashboard</h1>
-                          <p>This is the homepage of a simple general practioner interface...</p>
-                          <div class="row my-4">
-                              <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                          <div class="row">
+                              <div class="col-12 col-md-6">
                                   <div class="card">
-                                      <h5 class="card-header">Patients</h5>
+                                      <h5 class="card-header">Patient information</h5>
                                       <div class="card-body">
-                                          <h5 class="card-title">345</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-                                      </div>
+                                      		<div class="content">
+    													<img src={patient} alt="" ></img>
+    													<div class="content2"><b>Ellen Ter Stegen</b>
+    													<p>June 2, 12-07-1950 (70 years) <br></br>Female</p>
+    													</div></div>
+														
+														<p><i>Medical History </i><li>Diabetes</li><li>Cardiovascular Disease</li><br></br>
+														<i>Medications </i><li>Aspirin</li><li>Simvastatin</li><br></br>
+														<i>Allergies </i><li>None</li><br></br>
+														<i>Advanced care planning </i><li>No resuscitation</li></p>
+													</div>                                  
                                   </div>
                               </div>
-                              <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+                              <div class="col-12 col-md-6">
                                   <div class="card">
-                                      <h5 class="card-header">Column B</h5>
+                                      <h5 class="card-header">Referral information</h5>
                                       <div class="card-body">
-                                          <h5 class="card-title">...</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">....</p>
-                                      </div>
-                                  </div>
-                              </div>
-                              <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-                                  <div class="card">
-                                      <h5 class="card-header">Column C</h5>
-                                      <div class="card-body">
-                                          <h5 class="card-title">...</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">....</p>
-                                      </div>
-                                  </div>
-                              </div>
-                              <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-                                  <div class="card">
-                                      <h5 class="card-header">Column D</h5>
-                                      <div class="card-body">
-                                          <h5 class="card-title">...</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">....</p>
+                                          <b>Submit Information </b>
+														<form class="form-group" onSubmit={e => e.preventDefault()}>
+  														<input type="checkbox"/>
+  														<label for="x1">  Medical history</label> <br/>
+  														<input type="checkbox"/>
+  														<label for="x1">  Medications</label> <br/>
+  														<input type="checkbox"/>
+  														<label for="x1">  Allergies</label> <br/>
+  														<input type="checkbox"/>
+  														<label for="x1">  Advanced care planning</label> <br/>
+  														<input class="btn btn-primary" type="submit" value="Send"/>
+														</form>                              
+                                                                                       
+      												<br/><b>Referall information</b><br></br>
+      												<div class="md-form">
+  														<textarea id="form7" rows="9" class="md-textarea form-control" value={this.state.referral_msg}>
+      												</textarea>  
+      												</div>
                                       </div>
                                   </div>
                               </div>
                           </div>
+								  <br></br>                          
                           <div class="row">
                               <div class="col-12 col-xl-8 mb-4 mb-lg-0">
                                   <div class="card">
@@ -355,27 +442,24 @@ class App extends Component {
 										    </table>                                  
                                   </div>
      
-    										 <form name="message" onSubmit={this.sendMessage}>
+    										 <form class="form-group" name="message" onSubmit={this.sendMessage}>
        									  <input name="usermsg"
        										   size="63" height="200"
        										   value={this.state.message} onChange={this.handleMsgBoxChange} />
-        									   <input name="submitmsg" type="submit"/>
+        									   <input class="btn btn-primary" name="submitmsg" type="submit"/>
     										 </form>                           
                                   </div>
                               </div>
-                              <div class="col-12 col-xl-4">
+                              <div class="col-12 col-xl-4 onlinelist">
                                   <div class="card">
-                                      <h5 class="card-header">Patient flow</h5>
+                                      <h5 class="card-header">Who is online?</h5>
+												  <select name="olist" id="onlinelist" class="form-control selectonline" multiple>
+                                      {this.state.online_list.map(key => (
+                                      <option value={key['id']}>• {key['name']}</option>))};
+                                      <p>hi</p>
+                                      </select>                                   
                                       <div class="card-body">
-                                          <div class="ct-chart ct-legend">
-														                                       
-														<ChartistGraph class="ct-legend" data={{
-            										 labels: ['January', 'Februrary', 'March', 'April', 'May', 'June'],
-            										 series: [{data: [14,  12,  18,  20,  25,  28]},
-            										 			 {data: [8,   9,   11,  13,  12,  22]}]}} 
-            										 			 type={'Line'}
-            										 			  />                                          
-                                          </div>
+                                          <div id="traffic-chart"></div>
                                       </div>
                                   </div>
                               </div>

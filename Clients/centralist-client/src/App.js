@@ -1,9 +1,12 @@
+// Imports
 import React, { Component } from 'react';
 import './App.css';
 import logo from './Logo.png'; // with import
+import patient from './Patient.png';
 
 const ALIVE_INTERVAL = 60000; // 1 minute
 const MESSAGE_INTERVAL = 2000; // 1 second  
+const CLIENT_REFRESH_INTERVAL = 4000; // 4 minutes
 
 class App extends Component {
   
@@ -12,7 +15,7 @@ class App extends Component {
     
     // Entity ID and name for the specific client
     this.entity_id = 'a433296a52e4456aa5eae80d69dba8fe' 
-    this.client_name = 'CENTRALIST';
+    this.client_name = 'Zorg Coordinator';
     this.state = {
     	message: "",
     	destmessage: "",
@@ -27,9 +30,9 @@ class App extends Component {
     	selected_destination: "",
     }
     this.destinations = ['ELV', 'Hospital', 'Ambulance', 'Home'];
-    this.mockup = [{'name': 'xx', 'boo': 'lol'}, {'name': 'second', 'boo': 'asdasd'}];
-    
-	 // Check if we assigned a client ID, otherwise register no    
+
+	 // Check if we assigned a client ID, otherwise register no
+	 // VERY IMPORTANT: WE SHOULD use localStorage.clear() [in the browser] once we restart the database    
     if (localStorage.getItem('clientId') == null) {
 			// first time accessing browser
 			this.register();    
@@ -39,20 +42,23 @@ class App extends Component {
 	 console.log('Current Client ID:');    
     this.client_id = localStorage.getItem('clientId');
     console.log(this.client_id);
-    
-    this.get_clients();
   }
   
   componentDidMount() {
-    // Setup the alive and message timers
+    // Setup all the timers	
+    // Somehow this does not work as I thought it would...
+    // I should look into ReactJS timers someday
 	 this.get_messages();    
 	 this.sort_messages(); 
+    this.get_clients();
     
     this.timer_alive = setInterval(()=> this.send_alive(), ALIVE_INTERVAL);
     this.timer_message = setInterval(()=> this.get_messages(), MESSAGE_INTERVAL);
     this.timer_message_sort = setInterval(()=> this.sort_messages(), MESSAGE_INTERVAL);
+    this.timer_client_refresh = setInterval(() => this.get_clients(), CLIENT_REFRESH_INTERVAL);
   }
 
+  // register method to shoot when making a new ID  
   register() {
     fetch('https://acutelinkapi.azurewebsites.net/api/client/register', {
         method: 'POST',
@@ -77,6 +83,7 @@ class App extends Component {
     	})
   }
 
+  // retrieve clients  
   get_clients() {
       fetch('https://acutelinkapi.azurewebsites.net/api/client/clients', {
         method: 'GET',
@@ -91,6 +98,9 @@ class App extends Component {
     })
   }
   
+  // retrieve messages 
+  // its still a bit aspecific sometimes... I dont know why
+  // maybe this.state is not a real state of a current user  
   async get_messages() {
 	 if (this.state.partnerId != "") {    
         fetch('https://acutelinkapi.azurewebsites.net/api/chat/receive?clientId=' + this.state.partnerId, {
@@ -136,9 +146,8 @@ class App extends Component {
 					console.log('Message IN');
 					if (jsonData.length > 0) {
 						console.log(jsonData[0]['messages']);
-					
-						//console.log('Adding IN messages to: ');
-						//console.log(this.state.messages);
+						console.log('Adding IN messages to: ');
+						console.log(this.state.messages);
 						this.setState({out_messages: jsonData[0]['messages'].map(x => ({'name': this.state.partnerKey, 'message': x['message'], 'timestamp': x['timestamp']}))});			
 					}
 				})
@@ -152,6 +161,8 @@ class App extends Component {
     }
   }
   
+  // method to sort_messages so we can actually display a chat 
+  // next time we should filter at incoming messages 
   sort_messages() {
 		console.log('Sorting');
 		var total_msg = this.state.in_messages.concat(this.state.out_messages);
@@ -171,6 +182,7 @@ class App extends Component {
 		}	
   }
 
+  // send an alive request  
   async send_alive(){
       console.log(JSON.stringify({
             id: this.id,
@@ -195,11 +207,13 @@ class App extends Component {
     })
   }
   
+  // little utility function for formatting dates  
   formatDate(string){
     var options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'};
     return new Date(string).toLocaleDateString([],options);
   }
   
+  // selecting the partner  
   selectPartner = (e) => {
 	 this.setState({partnerId:e.target.value});
     this.setState({partnerKey:e.nativeEvent.target[e.nativeEvent.target.selectedIndex].text});
@@ -208,11 +222,14 @@ class App extends Component {
     //console.log(this.state.partnerKey);
   }
   
+  // selecting the destination  
   selectDest = (e) => {
   	this.setState({selected_destination:e.target.value});
+  	this.setState({selectedRow: -1});
   	this.fetch_destinations(e.target.value);  
   }
   
+  // fetching the destinations  
   fetch_destinations(target) {
     fetch('https://acutelinkapi.azurewebsites.net/api/capacity?type=' + target, {
         method: 'GET',
@@ -243,6 +260,7 @@ class App extends Component {
    console.log(e.target.value);
   }
   
+  // send a message with destination information  
   sendDestMessage = (e) => {
   	console.log('Sending message!!');
   	console.log(this.state.partnerId);
@@ -250,7 +268,7 @@ class App extends Component {
   	console.log(this.client_id);
   	
 	var selectedRow = this.state.selectedRow;  	
-  	var msg = 'Hi there ' + this.state.partnerKey + ', I just sent patient <X> to ' + this.state.destination_list[selectedRow]['name'];
+  	var msg = '[referral] ' + this.state.partnerKey + ', I just sent patient <X> to ' + this.state.destination_list[selectedRow]['name'];
   	var msg = msg + '. This center has ' + this.state.destination_list[selectedRow]['beds'] + ' free beds and is ';
   	var msg = msg + this.state.destination_list[selectedRow]['distance'] + ' kms away. Also, I have some additional information: ' + this.state.destmessage;
   	
@@ -281,6 +299,7 @@ class App extends Component {
 	e.preventDefault();  
   }
     
+  // sending a normal message  
   sendMessage = (e) => {
   	console.log('Sending message!!');
   	console.log(this.state.partnerId);
@@ -314,6 +333,7 @@ class App extends Component {
 	e.preventDefault();  
   }
   
+  // change color of table for highlights  
   changeColor = selectedRow => e => {
     if (selectedRow !== undefined) {
       this.setState({ selectedRow  });
@@ -321,6 +341,7 @@ class App extends Component {
     console.log(this.state.destination_list[selectedRow]);
   };
   
+  // render function for HTML page  
   render() {
       return (
           <div className="App">
@@ -329,7 +350,7 @@ class App extends Component {
                       <a class="navbar-brand" href="#">
                       <div className="logo">
           					<img src={logo} width="80"/>
-        					 <b>Centralist</b> Dashboard
+        					 <b>Zorg Coordination</b> Dashboard
         					 <br></br>
                       </div>
                       </a>
@@ -340,7 +361,7 @@ class App extends Component {
                   <div class="col-12 col-md-5 col-lg-8 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
                       <div class="dropdown">
                           <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-expanded="false">
-                              Hello, Dr. Hulsberg
+                              Hello, Ms. Odyssey
                           </button>
                           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                               <li><a class="dropdown-item" href="#">Settings</a></li>
@@ -355,8 +376,7 @@ class App extends Component {
                       <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
                           <div class="position-sticky">
 									   <br></br>                          		
-                          		<input type="text" placeholder="Search.." name="search"></input>  <br></br>
-                          		<br></br>
+                          		<input class="form-control" type="text" placeholder="Search.." name="search"></input>  <br></br>
                               <ul class="nav flex-column">					                                       
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
@@ -366,8 +386,8 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
+                                          <span class="ml-2">REQUEST 3439fasiJ</span> 
+                                      </a> Received: 11 min ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
@@ -377,8 +397,8 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
+                                          <span class="ml-2">REQUEST sd89D8Dsm</span> 
+                                      </a> Received: 38 min ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
@@ -388,8 +408,8 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
+                                          <span class="ml-2">REQUEST o0xxIFJmn</span> 
+                                      </a> Received: 42 min ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
@@ -399,8 +419,8 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
+                                          <span class="ml-2">REQUEST Usiq989Fi</span> 
+                                      </a> Received: 1h ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
@@ -410,8 +430,8 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
+                                          <span class="ml-2">REQUEST iFUSmzNUS</span> 
+                                      </a> Received: 2h ago
                                   </li>
                                   <li class="nav-item">
                                       <a class="nav-link" href="#">
@@ -421,7 +441,40 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                          <span class="ml-2">Reports</span>
+                                          <span class="ml-2">REQUEST ODySsEY01</span>
+                                      </a> Received: 2h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+														<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
+                                          <span class="ml-2">REQUEST uZmnzFJ94</span> 
+                                      </a> Received: 3h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+														<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
+                                          <span class="ml-2">REQUEST 98sdDFz7z</span> 
+                                      </a> Received: 3h ago
+                                  </li>
+                                  <li class="nav-item">
+                                      <a class="nav-link" href="#">
+														<svg xmlns="http://www.w3.org/2000/svg" 
+                                          width="24" height="24" viewBox="0 0 24 24" 
+                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
+                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
+                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
+                                          <span class="ml-2">REQUEST fJFSiUZZO</span> 
                                       </a> Received: 4h ago
                                   </li>
                                   <li class="nav-item">
@@ -432,30 +485,8 @@ class App extends Component {
                                           stroke-linejoin="round" class="feather feather-bar-chart-2">
                                           <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
                                           </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-														<svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
-                                          <span class="ml-2">REQUEST AZC</span> 
-                                      </a> Received: 4h ago
-                                  </li>
-                                  <li class="nav-item">
-                                      <a class="nav-link" href="#">
-														<svg xmlns="http://www.w3.org/2000/svg" 
-                                          width="24" height="24" viewBox="0 0 24 24" 
-                                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                          stroke-linejoin="round" class="feather feather-bar-chart-2">
-                                          <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4">
-                                          </line><line x1="6" y1="20" x2="6" y2="14"></line></svg>                                          
-                                          <span class="ml-2">REQUEST 1 HELOOOO</span> 
-                                      </a> Received: 4h ago
+                                          <span class="ml-2">REQUEST Fui8zUZZO</span> 
+                                      </a> Received: 5h ago
                                   </li>
 
                               </ul>
@@ -465,25 +496,25 @@ class App extends Component {
                           <nav aria-label="breadcrumb">
                               <ol class="breadcrumb">
                                   <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                  <li class="breadcrumb-item active" aria-current="page">Overview</li>
+                                  <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
                               </ol>
                           </nav>
-                          <h1 class="h2">Dashboard</h1>
                           <div class="row">
                               <div class="col-12 col-md-6">
                                   <div class="card">
                                       <h5 class="card-header">Patient information</h5>
                                       <div class="card-body">
-                                          <h5 class="card-title">345</h5>
-                                          <p class="card-text">...</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-                                          <p class="card-text text-success">18.2% increase since last month</p>
-
-                                      </div>
+                                      		<div class="content">
+    													<img src={patient} alt="" ></img>
+    													<div class="content2"><b>Ellen Ter Stegen</b>
+    													<p>June 2, 12-07-1950 (70 years) <br></br>Female</p>
+    													</div></div>
+														
+														<p><i>Medical History </i><li>Diabetes</li><li>Cardiovascular Disease</li><br></br>
+														<i>Medications </i><li>Aspirin</li><li>Simvastatin</li><br></br>
+														<i>Allergies </i><li>None</li><br></br>
+														<i>Advanced care planning </i><li>No resuscitation</li></p>
+													</div>                                  
                                   </div>
                               </div>
                               <div class="col-12 col-md-6">
@@ -520,7 +551,7 @@ class App extends Component {
       												<form name="message" onSubmit={this.sendDestMessage}>
 											         <textarea name="dest_text" cols="40" rows="5"
 											         value={this.state.destmessage} onChange={this.handleDestBoxChange}></textarea> <br></br>  									  			
-        									   		<input name="submitmsg" type="submit"/>
+        									   		<input class="btn btn-primary" name="submitmsg" type="submit"/>
     										 			</form> 
                                           
                                       </div>
@@ -536,25 +567,25 @@ class App extends Component {
                                   <div id="chatbox">
                                   <table width="710px" border="0" class="table table-striped">
                                   <tbody>
-											 {this.state.sorted_messages.length > 0 ? this.state.sorted_messages.map((k) => <tr><td class="chattd" width='170px'>{this.formatDate(k['timestamp'])}</td> <td class='chattd' width='140px'> <b> {k['name']} </b> </td> <td class='chattd' width='400px'>{k['message']}</td></tr>): 'No messages yet' }                                      
+											 {this.state.sorted_messages.length > 0 ? this.state.sorted_messages.map((k) => <tr><td class="chattd" width='170px'>{this.formatDate(k['timestamp'])}</td> <td class='chattd' width='180px'> <b> {k['name']} </b> </td> <td class='chattd' width='360px'>{k['message']}</td></tr>): 'No messages yet' }                                      
 										    </tbody>										    
 										    </table>                                  
                                   </div>
      
     										 <form name="message" onSubmit={this.sendMessage}>
-       									  <input name="usermsg"
-       										   size="63" height="200"
-       										   value={this.state.message} onChange={this.handleMsgBoxChange} />
-        									   <input name="submitmsg" type="submit"/>
+											  <textarea name="usermsg" cols="70" rows="1"
+											         value={this.state.message} onChange={this.handleMsgBoxChange}></textarea>       									  
+        									   <input class="btn btn-primary" name="submitmsg" type="submit"/>
     										 </form>                           
                                   </div>
                               </div>
                               <div class="col-12 col-xl-4 onlinelist">
                                   <div class="card">
-                                      <h5 class="card-header">Online institutions</h5>
-												  <select name="olist" id="onlinelist" class="selectonline" onChange={this.selectPartner} multiple>
+                                      <h5 class="card-header">Who is online?</h5>
+												  <select name="olist" id="onlinelist" class="form-control selectonline" onChange={this.selectPartner} multiple>
                                       {this.state.online_list.map(key => (
                                       <option value={key['id']}>• {key['name']}</option>))};
+                                      <p>hi</p>
                                       </select>                                   
                                       <div class="card-body">
                                           <div id="traffic-chart"></div>
