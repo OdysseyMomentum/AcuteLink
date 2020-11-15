@@ -49,6 +49,7 @@ namespace AcuteLink.Backend
           });
 
       services.AddScoped<ICoreRepository>(p => p.GetService<CoreRepository>());
+      services.AddScoped<ICapacityRepository>(p => new InMemoryCapacityRepository());
 
       services.AddCors(options =>
         {
